@@ -1,0 +1,44 @@
+transactions = []
+
+def add_transaction():
+    ttype = input("Type (Income/Expense): ")
+    cat = input("Category: ")
+    amt = float(input("Amount: "))
+    date = input("Date (YYYY-MM-DD): ")
+    transactions.append({"type": ttype, "category": cat, "amount": amt, "date": date})
+    print("✅ Transaction Added!\n")
+
+def view_transactions():
+    if not transactions:
+        print("No transactions yet.\n")
+        return
+    print("\n--- Transactions ---")
+    for t in transactions:
+        print(f"{t['date']} | {t['type']} | {t['category']} | ${t['amount']:.2f}")
+    print()
+
+def filter_expenses():
+    print("\n--- Expenses Over $100 ---")
+    for t in transactions:
+        if t["type"].lower() == "expense" and t["amount"] > 100:
+            print(f"{t['date']} | {t['category']} | ${t['amount']:.2f}")
+    print()
+
+while True:
+    print("1. Add Transaction")
+    print("2. View Transactions")
+    print("3. Filter Expenses > $100")
+    print("4. Exit")
+    choice = input("Choose: ")
+
+    if choice == "1":
+        add_transaction()
+    elif choice == "2":
+        view_transactions()
+    elif choice == "3":
+        filter_expenses()
+    elif choice == "4":
+        print("👋 Goodbye!")
+        break
+    else:
+        print("Invalid choice!\n")
