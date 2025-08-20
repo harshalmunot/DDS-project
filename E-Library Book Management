@@ -1,0 +1,139 @@
+# ---------------- Linked List Node (for Books) ----------------
+class BookNode:
+    def __init__(self, title, author, available=True):
+        self.title = title
+        self.author = author
+        self.available = available
+        self.next = None
+
+
+# ---------------- Stack (for Undo actions) ----------------
+class ActionStack:
+    def __init__(self):
+        self.stack = []
+
+    def push(self, action):
+        self.stack.append(action)
+
+    def pop(self):
+        return self.stack.pop() if self.stack else None
+
+    def is_empty(self):
+        return len(self.stack) == 0
+
+
+# ---------------- Library System ----------------
+class E_Library:
+    def __init__(self):
+        self.head = None   # linked list for books
+        self.undo_stack = ActionStack()
+
+    # Add new book to inventory
+    def add_book(self, title, author):
+        new_book = BookNode(title, author)
+        new_book.next = self.head
+        self.head = new_book
+        print(f"✅ Added '{title}' by {author} to inventory.")
+
+    # Search books by title or author
+    def search_books(self, keyword):
+        keyword = keyword.lower()
+        current = self.head
+        results = []
+        while current:
+            if keyword in current.title.lower() or keyword in current.author.lower():
+                results.append((current.title, current.author, current.available))
+            current = current.next
+
+        if results:
+            print("\n🔍 Search Results:")
+            for r in results:
+                status = "Available" if r[2] else "Borrowed"
+                print(f" - {r[0]} by {r[1]} [{status}]")
+        else:
+            print("❌ No books found.")
+
+    # Borrow a book
+    def borrow_book(self, title):
+        current = self.head
+        while current:
+            if current.title.lower() == title.lower():
+                if current.available:
+                    current.available = False
+                    self.undo_stack.push(("borrow", current))
+                    print(f"📖 You borrowed '{current.title}'.")
+                else:
+                    print("❌ Book is already borrowed.")
+                return
+            current = current.next
+        print("❌ Book not found.")
+
+    # Return a book
+    def return_book(self, title):
+        current = self.head
+        while current:
+            if current.title.lower() == title.lower():
+                if not current.available:
+                    current.available = True
+                    self.undo_stack.push(("return", current))
+                    print(f"📚 You returned '{current.title}'.")
+                else:
+                    print("❌ Book was not borrowed.")
+                return
+            current = current.next
+        print("❌ Book not found.")
+
+    # Undo last action
+    def undo_action(self):
+        if self.undo_stack.is_empty():
+            print("⚠️ No actions to undo.")
+            return
+
+        action, book = self.undo_stack.pop()
+        if action == "borrow":
+            book.available = True
+            print(f"↩️ Undo: '{book.title}' marked as Available again.")
+        elif action == "return":
+            book.available = False
+            print(f"↩️ Undo: '{book.title}' marked as Borrowed again.")
+
+    # Display all books
+    def display_books(self):
+        if not self.head:
+            print("📂 No books in inventory.")
+            return
+
+        print("\n---- Library Inventory ----")
+        current = self.head
+        while current:
+            status = "Available" if current.available else "Borrowed"
+            print(f"{current.title} by {current.author} [{status}]")
+            current = current.next
+        print("----------------------------")
+
+
+# ---------------- Demo Usage ----------------
+if __name__ == "__main__":
+    library = E_Library()
+
+    # Add books
+    library.add_book("The Alchemist", "Paulo Coelho")
+    library.add_book("1984", "George Orwell")
+    library.add_book("A Brief History of Time", "Stephen Hawking")
+
+    library.display_books()
+
+    # Borrow + Return
+    library.borrow_book("1984")
+    library.display_books()
+
+    library.return_book("1984")
+    library.display_books()
+
+    # Undo last action
+    library.undo_action()
+    library.display_books()
+
+    # Search feature
+    library.search_books("George")
+    library.search_books("History")
