@@ -1,0 +1,80 @@
+class CarNode:
+    """Linked list node for each parked car"""
+    def __init__(self, plate_number, slot):
+        self.plate_number = plate_number
+        self.slot = slot
+        self.next = None
+
+
+class ParkingLot:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.available_slots = list(range(1, capacity + 1))  # dynamic slots
+        self.head = None  # linked list for active cars
+        self.size = 0
+
+    # Park a new car
+    def park_car(self, plate_number):
+        if self.size >= self.capacity:
+            print("🚫 Parking Full! Car cannot be parked.")
+            return
+
+        slot = self.available_slots.pop(0)  # assign nearest free slot
+        new_car = CarNode(plate_number, slot)
+
+        # Insert at head of linked list
+        new_car.next = self.head
+        self.head = new_car
+
+        self.size += 1
+        print(f"✅ Car {plate_number} parked at slot {slot}.")
+
+    # Remove a car
+    def remove_car(self, plate_number):
+        prev, curr = None, self.head
+        while curr:
+            if curr.plate_number == plate_number:
+                if prev:
+                    prev.next = curr.next
+                else:
+                    self.head = curr.next
+                self.available_slots.append(curr.slot)  # free slot
+                self.available_slots.sort()
+                self.size -= 1
+                print(f"🅿️ Car {plate_number} removed from slot {curr.slot}.")
+                return
+            prev, curr = curr, curr.next
+
+        print("❌ Car not found in parking lot.")
+
+    # Display parked cars
+    def display_parking(self):
+        if not self.head:
+            print("🚘 Parking lot is empty.")
+            return
+
+        print("\n--- Current Parked Cars ---")
+        curr = self.head
+        while curr:
+            print(f"Car {curr.plate_number} -> Slot {curr.slot}")
+            curr = curr.next
+        print("---------------------------")
+
+
+# --------- Demo Usage ---------
+if __name__ == "__main__":
+    lot = ParkingLot(capacity=3)
+
+    lot.park_car("MH12AB1234")
+    lot.park_car("MH14XY9999")
+    lot.park_car("DL01CD4567")
+
+    lot.display_parking()
+
+    # Trying to park when full
+    lot.park_car("KA05EF1111")
+
+    lot.remove_car("MH14XY9999")
+    lot.park_car("KA05EF1111")
+
+    lot.display_parking()
